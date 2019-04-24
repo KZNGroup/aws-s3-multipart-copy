@@ -60,8 +60,8 @@ function initiateMultipartCopy(destination_bucket, copied_object_name, copied_ob
     expiration_period ? params.Expires = expiration_period : null;
     content_type ? params.ContentType = content_type : null;
     server_side_encryption ? params.ServerSideEncryption = server_side_encryption : null;
-    tagging ? params.Tagging = tagging : null;
-    metadata ? params.Metadata = metadata : null;
+    tagging ? params.Tagging = tagging : undefined;
+    metadata ? params.Metadata = metadata : undefined;
     sse_kms_key_id ? params.SSEKmsKeyId = sse_kms_key_id : null;
 
     return s3.createMultipartUpload(params).promise()
