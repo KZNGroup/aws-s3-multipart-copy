@@ -30,8 +30,8 @@ const init = function (aws_s3_object, initialized_logger) {
  * (note that copy_part_size_bytes, copied_object_permissions, expiration_period are optional and will be assigned with default values if not given)
  * @param {*} request_context optional parameter for logging purposes
  */
-const copyObjectMultipart = async function ({ source_bucket, object_key, destination_bucket, copied_object_name, object_size, copy_part_size_bytes, copied_object_permissions, expiration_period, server_side_encryption, content_type }, request_context) {
-    const upload_id = await initiateMultipartCopy(destination_bucket, copied_object_name, copied_object_permissions, expiration_period, request_context, server_side_encryption, content_type);
+const copyObjectMultipart = async function ({ source_bucket, object_key, destination_bucket, copied_object_name, object_size, copy_part_size_bytes, copied_object_permissions, expiration_period, server_side_encryption, content_type, tagging_directive, tagging, metadata_directive, metadata, sse_kms_key_id }, request_context) {
+    const upload_id = await initiateMultipartCopy(destination_bucket, copied_object_name, copied_object_permissions, expiration_period, request_context, server_side_encryption, content_type, tagging_directive, tagging, metadata_directive, metadata, sse_kms_key_id);
     const partitionsRangeArray = calculatePartitionsRangeArray(object_size, copy_part_size_bytes);
     const copyPartFunctionsArray = [];
 
@@ -51,7 +51,7 @@ const copyObjectMultipart = async function ({ source_bucket, object_key, destina
         });
 };
 
-function initiateMultipartCopy(destination_bucket, copied_object_name, copied_object_permissions, expiration_period, request_context, server_side_encryption, content_type) {
+function initiateMultipartCopy(destination_bucket, copied_object_name, copied_object_permissions, expiration_period, request_context, server_side_encryption, content_type, tagging_directive, tagging, metadata_directive, metadata, sse_kms_key_id) {
     const params = {
         Bucket: destination_bucket,
         Key: copied_object_name,
@@ -60,6 +60,11 @@ function initiateMultipartCopy(destination_bucket, copied_object_name, copied_ob
     expiration_period ? params.Expires = expiration_period : null;
     content_type ? params.ContentType = content_type : null;
     server_side_encryption ? params.ServerSideEncryption = server_side_encryption : null;
+    tagging_directive ? params.TaggingDirective = tagging_directive : null;
+    tagging ? params.Taggin = tagging : null;
+    metadata_directive ? params.MetadataDirective = metadata_directive : null;
+    metadata ? params.metadata = Metadata : null;
+    sse_kms_key_id ? params.SSEKmsKeyId = sse_kms_key_id : null;
 
     return s3.createMultipartUpload(params).promise()
         .then((result) => {
